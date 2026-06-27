@@ -26,6 +26,8 @@ Leave it empty for the Windows Electron build.
 npm run build:android:debug
 ```
 
+The build script regenerates Android launcher icons from `build/icon.png` before packaging.
+
 Output:
 
 ```text
