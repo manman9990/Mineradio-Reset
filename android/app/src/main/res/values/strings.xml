@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">Mineradio</string>
-    <string name="title_activity_main">Mineradio</string>
-    <string name="package_name">com.mineradio.app</string>
-    <string name="custom_url_scheme">com.mineradio.app</string>
+    <string name="app_name">Mineradio Reset</string>
+    <string name="title_activity_main">Mineradio Reset</string>
+    <string name="package_name">com.manman9990.mineradioreset</string>
+    <string name="custom_url_scheme">com.manman9990.mineradioreset</string>
 </resources>

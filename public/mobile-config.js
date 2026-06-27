@@ -1,3 +1,4 @@
-// Android/WebView builds can point API calls at a Mineradio server.
-// Leave empty for the Windows Electron build, where /api is served locally.
+// Android/WebView builds must point API calls at a public Mineradio API server.
+// Use an HTTPS domain for real mobile use. Leave empty for Windows Electron,
+// where /api is served by the local Electron-started server.js.
 window.MINERADIO_API_BASE = window.MINERADIO_API_BASE || '';

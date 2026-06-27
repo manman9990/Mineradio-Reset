@@ -1,4 +1,4 @@
-package com.mineradio.app;
+package com.manman9990.mineradioreset;
 
 import com.getcapacitor.BridgeActivity;
 

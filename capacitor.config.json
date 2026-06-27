@@ -1,6 +1,6 @@
 {
-  "appId": "com.mineradio.app",
-  "appName": "Mineradio",
+  "appId": "com.manman9990.mineradioreset",
+  "appName": "Mineradio Reset",
   "webDir": "public",
   "server": {
     "androidScheme": "https",

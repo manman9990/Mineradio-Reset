@@ -207,11 +207,22 @@ function sendJSON(res, data, status) {
   res.writeHead(status || 200, {
     'Content-Type': 'application/json; charset=utf-8',
     'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'GET,POST,OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type,Authorization',
     'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
     'Pragma': 'no-cache',
     'Expires': '0',
   });
   res.end(JSON.stringify(data));
+}
+function sendCORSPreflight(res) {
+  res.writeHead(204, {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'GET,POST,OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type,Authorization',
+    'Access-Control-Max-Age': '86400',
+  });
+  res.end();
 }
 
 function ensureDirForFile(file) {
@@ -3683,6 +3694,11 @@ async function getLoginInfo() {
 const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, 'http://localhost:' + PORT);
   const pn = url.pathname;
+
+  if (req.method === 'OPTIONS') {
+    sendCORSPreflight(res);
+    return;
+  }
 
   if (pn === '/api/app/version') {
     sendJSON(res, {

@@ -1,0 +1,11 @@
+android/
+dist/
+node_modules/
+.git/
+.playwright-cli/
+output/
+tmp/
+npm-debug.log*
+*.apk
+*.exe
+*.blockmap

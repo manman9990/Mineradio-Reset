@@ -826,6 +826,14 @@ body.login-guide-active #login-guide-canvas{opacity:1}
 .qq-cookie-actions{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:9px}
 .qq-cookie-note{font-size:10.5px;color:rgba(255,255,255,.36);line-height:1.45;text-align:left}
 .qq-cookie-panel .modal-btn{padding:8px 12px;white-space:nowrap}
+.mobile-api-panel{display:none;margin:10px 0 12px;padding:12px;border-radius:14px;border:1px solid rgba(244,210,138,.18);background:linear-gradient(135deg,rgba(244,210,138,.055),rgba(255,255,255,.025));text-align:left}
+.mobile-api-panel.show{display:block}
+.mobile-api-title{font-size:12px;font-weight:760;color:rgba(244,210,138,.88);margin-bottom:6px}
+.mobile-api-note{font-size:11px;line-height:1.55;color:rgba(255,255,255,.48);margin-bottom:9px}
+.mobile-api-row{display:flex;gap:8px;align-items:center}
+.mobile-api-input{flex:1;min-width:0;height:38px;border:1px solid rgba(255,255,255,.09);border-radius:10px;background:rgba(0,0,0,.22);color:rgba(255,255,255,.86);padding:0 11px;font-family:inherit;font-size:11.5px;outline:none}
+.mobile-api-input:focus{border-color:rgba(244,210,138,.42);box-shadow:0 0 0 1px rgba(244,210,138,.10)}
+.mobile-api-row .modal-btn{height:38px;padding:0 13px;white-space:nowrap}
 #qq-cookie-toggle-btn{display:none;padding:8px 13px}
 #qq-cookie-toggle-btn.show{display:inline-flex;align-items:center;justify-content:center}
 #qr-status{font-size:12px;color:rgba(255,255,255,0.7);min-height:18px;margin-bottom:14px;letter-spacing:.3px}
@@ -2489,6 +2497,14 @@ html.control-glass-svg-ok #visual-guide-btn:hover{
       <button id="qq-web-login-card" class="qq-login-mark" type="button" onclick="openProviderWebLogin()"><b>QQ</b><span>打开官方扫码窗口</span></button>
     </div>
     <div id="qr-status">正在生成二维码…</div>
+    <div id="mobile-api-panel" class="mobile-api-panel">
+      <div class="mobile-api-title">Android 需要公网后端</div>
+      <div class="mobile-api-note">手机不能运行 Electron 的 server.js。请填写已部署的 Mineradio API 地址，外出使用也会走这个固定服务。</div>
+      <div class="mobile-api-row">
+        <input id="mobile-api-input" class="mobile-api-input" type="url" inputmode="url" spellcheck="false" autocomplete="off" placeholder="https://api.example.com">
+        <button id="mobile-api-save-btn" class="modal-btn primary" type="button" onclick="saveMobileApiBase()">保存</button>
+      </div>
+    </div>
     <div id="qq-cookie-panel" class="qq-cookie-panel">
       <textarea id="qq-cookie-input" class="qq-cookie-input" spellcheck="false" autocomplete="off" placeholder="uin=...; qqmusic_key=...; qm_keyst=..."></textarea>
       <div class="qq-cookie-actions">
@@ -15104,19 +15120,58 @@ function normalizeApiBase(value) {
   if (!value || value === '/') return '';
   return value.replace(/\/+$/, '');
 }
+var MINERADIO_API_BASE_STORE_KEY = 'mineradio-api-base';
 var MINERADIO_API_BASE = normalizeApiBase(
   window.MINERADIO_API_BASE ||
   (window.MineradioAndroid && window.MineradioAndroid.apiBase) ||
   (new URLSearchParams(window.location.search || '')).get('apiBase') ||
-  localStorage.getItem('mineradio-api-base') ||
+  localStorage.getItem(MINERADIO_API_BASE_STORE_KEY) ||
   ''
 );
+function isMobileRuntime() {
+  var ua = navigator.userAgent || '';
+  return !window.desktopWindow && (/Android|iPhone|iPad|iPod/i.test(ua) || window.Capacitor);
+}
+function isApiPath(url) {
+  return typeof url === 'string' && /^\/api(?:\/|\?|$)/.test(url);
+}
 function apiUrl(url) {
-  if (typeof url !== 'string' || !/^\/api(?:\/|\?|$)/.test(url)) return url;
+  if (!isApiPath(url)) return url;
   return MINERADIO_API_BASE ? (MINERADIO_API_BASE + url) : url;
+}
+function mobileApiMissingMessage() {
+  return 'Android 版需要连接公网 Mineradio API。请先部署 server.js，并在这里填写 https://... 后端地址。';
+}
+function isValidApiBase(value) {
+  return /^https?:\/\/[^/\s]+(?::\d+)?(?:\/[^\s]*)?$/i.test(String(value || '').trim());
+}
+function refreshMobileApiPanel() {
+  var panel = document.getElementById('mobile-api-panel');
+  var input = document.getElementById('mobile-api-input');
+  if (!panel) return;
+  var show = isMobileRuntime() && !window.desktopWindow;
+  panel.classList.toggle('show', show);
+  if (input && document.activeElement !== input) input.value = MINERADIO_API_BASE || '';
+}
+function saveMobileApiBase() {
+  var input = document.getElementById('mobile-api-input');
+  var statusEl = document.getElementById('qr-status');
+  var value = normalizeApiBase(input ? input.value : '');
+  if (!isValidApiBase(value)) {
+    if (statusEl) { statusEl.textContent = '请填写公网后端地址，例如 https://api.example.com'; statusEl.className = 'fail'; }
+    return;
+  }
+  MINERADIO_API_BASE = value;
+  try { localStorage.setItem(MINERADIO_API_BASE_STORE_KEY, value); } catch (e) {}
+  refreshMobileApiPanel();
+  if (statusEl) { statusEl.textContent = '后端地址已保存，正在重试...'; statusEl.className = 'preview'; }
+  refreshQr();
 }
 async function apiJson(url, opts) {
   opts = opts || {};
+  if (isMobileRuntime() && isApiPath(url) && !MINERADIO_API_BASE) {
+    throw new Error(mobileApiMissingMessage());
+  }
   var timeoutMs = Number(opts.timeoutMs) || 0;
   var fetchOpts = Object.assign({}, opts);
   delete fetchOpts.timeoutMs;
@@ -15128,6 +15183,15 @@ async function apiJson(url, opts) {
   }
   try {
     var res = await fetch(apiUrl(url), fetchOpts);
+    var contentType = (res.headers && res.headers.get && res.headers.get('content-type')) || '';
+    if (!res.ok) {
+      throw new Error('API 请求失败: HTTP ' + res.status);
+    }
+    if (contentType && contentType.indexOf('application/json') < 0) {
+      var text = await res.text();
+      if (/^\s*</.test(text || '')) throw new Error(mobileApiMissingMessage());
+      throw new Error('API 返回的不是 JSON');
+    }
     return res.json();
   } finally {
     if (timer) clearTimeout(timer);
@@ -23598,6 +23662,7 @@ function updateLoginProviderUi() {
   var neteaseBtn = document.getElementById('login-provider-netease');
   var qqBtn = document.getElementById('login-provider-qq');
   var canOpenNeteaseWeb = !!(window.desktopWindow && typeof window.desktopWindow.openNeteaseMusicLogin === 'function');
+  var mobileRuntime = isMobileRuntime();
   if (neteaseBtn) neteaseBtn.classList.toggle('active', loginProvider === 'netease');
   if (qqBtn) qqBtn.classList.toggle('active', isQQ);
   if (title) title.textContent = '扫码登录' + meta.label;
@@ -23636,10 +23701,47 @@ function updateLoginProviderUi() {
     refreshBtn.textContent = isQQ ? (qqWebLoginBusy ? '等待扫码…' : '扫码登录') : (canOpenNeteaseWeb ? (neteaseWebLoginBusy ? '等待扫码…' : '网页登录') : '刷新二维码');
     refreshBtn.onclick = isQQ ? openQQWebLogin : (canOpenNeteaseWeb ? openNeteaseWebLogin : refreshQr);
   }
+  if (mobileRuntime && isQQ) {
+    if (qqCard) {
+      qqCard.disabled = false;
+      var mobileCardLabel = qqCard.querySelector('span');
+      if (mobileCardLabel) mobileCardLabel.textContent = '使用手动导入';
+    }
+    if (st) {
+      st.className = 'fail';
+      st.textContent = 'Android 版不使用桌面扫码窗口。QQ 可先用手动导入会话，后续需要做原生登录。';
+    }
+    if (refreshBtn) {
+      refreshBtn.disabled = false;
+      refreshBtn.textContent = '手动导入';
+      refreshBtn.onclick = function(){ qqManualCookieOpen = true; updateLoginProviderUi(); };
+    }
+  } else if (mobileRuntime && !MINERADIO_API_BASE) {
+    if (st) {
+      st.className = 'fail';
+      st.textContent = mobileApiMissingMessage();
+    }
+  }
+  refreshMobileApiPanel();
 }
 async function refreshQr() {
   stopQrPoll();
   updateLoginProviderUi();
+  if (isMobileRuntime() && !MINERADIO_API_BASE) {
+    qrKey = null;
+    var mobileImg = document.getElementById('qr-img');
+    var mobileStatus = document.getElementById('qr-status');
+    if (mobileImg) mobileImg.src = '';
+    if (mobileStatus) { mobileStatus.textContent = mobileApiMissingMessage(); mobileStatus.className = 'fail'; }
+    refreshMobileApiPanel();
+    return;
+  }
+  if (isMobileRuntime() && loginProvider === 'qq') {
+    qrKey = null;
+    qqManualCookieOpen = true;
+    updateLoginProviderUi();
+    return;
+  }
   if (loginProvider === 'qq') {
     qrKey = null;
     var qqStatus = document.getElementById('qr-status');
