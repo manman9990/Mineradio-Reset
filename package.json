@@ -1,9 +1,9 @@
 {
-  "name": "mineradio",
-  "productName": "Mineradio",
-  "version": "1.1.1",
-  "description": "沉浸式音乐播放器，融合天气电台、歌词舞台、粒子视觉和 3D 歌单架。",
-  "author": "Mineradio",
+  "name": "mineradio-reset",
+  "productName": "Mineradio Reset",
+  "version": "1.0.0",
+  "description": "manman9990 的 Mineradio 重置版，桌面音乐播放器。",
+  "author": "manman9990",
   "main": "desktop/main.js",
   "private": true,
   "scripts": {
@@ -14,8 +14,8 @@
     "build:android:debug": "powershell -ExecutionPolicy Bypass -File build/android-debug.ps1"
   },
   "build": {
-    "appId": "com.mineradio.desktop",
-    "productName": "Mineradio",
+    "appId": "com.manman9990.mineradioreset",
+    "productName": "Mineradio Reset",
     "directories": {
       "output": "dist",
       "buildResources": "build"
@@ -36,7 +36,7 @@
     ],
     "asar": false,
     "win": {
-      "executableName": "Mineradio",
+      "executableName": "Mineradio Reset",
       "icon": "build/icon.ico",
       "signAndEditExecutable": false,
       "target": [
@@ -54,28 +54,28 @@
       "allowToChangeInstallationDirectory": false,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
-      "shortcutName": "Mineradio",
+      "shortcutName": "Mineradio Reset",
       "installerIcon": "build/icon.ico",
       "uninstallerIcon": "build/icon.ico",
       "installerSidebar": "build/installerSidebar.bmp",
       "uninstallerSidebar": "build/installerSidebar.bmp",
       "installerHeader": "build/installerHeader.bmp",
       "include": "build/installer.nsh",
-      "artifactName": "Mineradio-${version}-Setup.${ext}"
+      "artifactName": "MineradioReset-${version}-Setup.${ext}"
     },
     "publish": [
       {
         "provider": "github",
-        "owner": "XxHuberrr",
-        "repo": "Mineradio"
+        "owner": "manman9990",
+        "repo": "Mineradio-Reset"
       }
     ]
   },
   "mineradio": {
     "update": {
       "provider": "github",
-      "owner": "XxHuberrr",
-      "repo": "Mineradio",
+      "owner": "manman9990",
+      "repo": "Mineradio-Reset",
       "preview": true,
       "preferMirrors": true,
       "mirrors": [

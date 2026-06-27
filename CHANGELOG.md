@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.0.0 - manman9990 reset
+
+- 将当前代码作为 manman9990 的重置版首个版本基线。
+- 应用元数据改为 `Mineradio Reset`，包名改为 `mineradio-reset`，作者改为 `manman9990`。
+- GitHub 发布与更新目标改为 `manman9990/Mineradio-Reset`。
+
 ## v1.1.1
 
 - P0 installer safety fix: installation now defaults to the first available non-C drive from `D:\Mineradio` through `Z:\Mineradio`; it falls back to `C:\Mineradio` only when no D-Z drive exists.
